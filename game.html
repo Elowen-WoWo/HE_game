@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>🍉 合成大作战</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: #2b1e16;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', 'PingFang SC', sans-serif;
+            padding: 10px;
+            touch-action: none;
+            overflow: hidden;
+        }
+        .game-container {
+            background: #f5ede4;
+            border-radius: 32px 32px 24px 24px;
+            padding: 14px 14px 20px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            position: relative;
+        }
+        .back-btn {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: #dccfc4;
+            border: none;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #4d372b;
+            text-decoration: none;
+            z-index: 10;
+            touch-action: manipulation;
+        }
+        .back-btn:active {
+            transform: scale(0.88);
+        }
+        .header {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0 4px 10px 4px;
+            padding-left: 48px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .score-box {
+            background: #dccfc4;
+            padding: 4px 14px 4px 10px;
+            border-radius: 30px;
+            font-size: 13px;
+            color: #4d372b;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .score-box .num {
+            font-size: 18px;
+            color: #2b1a0e;
+            min-width: 24px;
+            text-align: center;
+        }
+        .current-box {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: #6d5546;
+            font-weight: 500;
+        }
+        .current-preview {
+            width: 36px;
+            height: 36px;
+            background: #e5d7cc;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            border: 2px solid #d0bdb0;
+            overflow: hidden;
+        }
+        .current-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .btn-reset {
+            background: #dccfc4;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4d372b;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .btn-reset:active {
+            transform: scale(0.92);
+        }
+        .canvas-wrap {
+            background: #dccfc4;
+            border-radius: 20px 20px 16px 16px;
+            padding: 6px;
+            box-shadow: inset 0 -3px 0 #b8a79a;
+        }
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 360 / 580;
+            background: #f5ede4;
+            border-radius: 16px 16px 12px 12px;
+            cursor: grab;
+            touch-action: none;
+        }
+        #gameCanvas:active {
+            cursor: grabbing;
+        }
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            color: #8a7565;
+            font-size: 12px;
+        }
+        .footer .hint {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .best-record {
+            color: #a67b6b;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        .celebrate-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+        .celebrate-card {
+            background: #faf3ec;
+            border-radius: 48px;
+            padding: 30px 24px 24px;
+            max-width: 300px;
+            width: 85%;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+            animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .celebrate-card .big {
+            font-size: 48px;
+            display: block;
+        }
+        .celebrate-card h2 {
+            font-size: 22px;
+            color: #4d3225;
+            margin: 4px 0 2px;
+        }
+        .celebrate-card p {
+            color: #7f5f4e;
+            font-size: 15px;
+            margin: 2px 0 12px;
+        }
+        .btn-close-card {
+            background: #dccfc4;
+            border: none;
+            padding: 8px 28px;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #3d2a1e;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .btn-close-card:active {
+            transform: scale(0.94);
+        }
+        @keyframes popIn {
+            from {
+                transform: scale(0.8) translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <a href="index.html" class="back-btn">←</a>
+
+        <div class="header">
+            <div class="score-box">
+                🏆 <span class="num" id="scoreNum">0</span>
+            </div>
+            <div class="current-box">
+                <div class="current-preview" id="currentPreview">
+                    <span id="previewEmoji">🍎</span>
+                    <img id="previewImg" style="display:none;" />
+                </div>
+            </div>
+            <button class="btn-reset" id="resetBtn">↻</button>
+        </div>
+
+        <div class="canvas-wrap">
+            <canvas id="gameCanvas" width="360" height="580"></canvas>
+        </div>
+
+        <div class="footer">
+            <span class="hint">👇 拖动 · 松开掉落</span>
+            <span class="best-record">🏅 最高: <span id="bestScoreDisplay">0</span></span>
+        </div>
+    </div>
+
+    <div class="celebrate-overlay" id="celebrateOverlay">
+        <div class="celebrate-card">
+            <span class="big">🎉</span>
+            <h2>合成成功！</h2>
+            <p>太棒啦！继续挑战吧 ✨</p>
+            <button class="btn-close-card" id="closeCelebrate">👍 继续</button>
+        </div>
+    </div>
+
+    <script>
+        const CONFIG = {
+            IMAGES: [
+                'assets/level_0.png',
+                'assets/level_1.png',
+                'assets/level_2.png',
+                'assets/level_3.png',
+                'assets/level_4.png',
+                'assets/level_5.png',
+                'assets/level_6.png',
+                'assets/level_7.png'
+            ],
+            EMOJIS: ['🍎', '🍐', '🍊', '🍇', '🍒', '🍉', '🌟', '👑'],
+            SOUNDS: {
+                merge: [
+                    'assets/sounds/merge_0.mp3',
+                    'assets/sounds/merge_1.mp3',
+                    'assets/sounds/merge_2.mp3',
+                    'assets/sounds/merge_3.mp3',
+                    'assets/sounds/merge_4.mp3',
+                    'assets/sounds/merge_5.mp3',
+                    'assets/sounds/merge_6.mp3'
+                ],
+                celebrate: 'assets/sounds/celebrate.mp3'
+            },
+            MAX_LEVEL: 7,
+            COLORS: ['#f5a08c', '#f5c28c', '#b5d68c', '#8cc9d6', '#d4a0d4', '#f5c8a0', '#f5d88c', '#f0b0d0'],
+            GAME_ID: 'game_merge',
+        };
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreNum = document.getElementById('scoreNum');
+        const previewEmoji = document.getElementById('previewEmoji');
+        const previewImg = document.getElementById('previewImg');
+        const resetBtn = document.getElementById('resetBtn');
+        const overlay = document.getElementById('celebrateOverlay');
+        const closeBtn = document.getElementById('closeCelebrate');
+        const bestScoreDisplay = document.getElementById('bestScoreDisplay');
+
+        const W = 360, H = 580;
+        const GROUND_Y = H - 12;
+
+        const STORAGE_KEY = 'aibo_game_records';
+
+        function getRecords() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                return data ? JSON.parse(data) : {};
+            } catch { return {}; }
+        }
+
+        function saveRecords(records) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+        }
+
+        function getGameRecord() {
+            const records = getRecords();
+            return records[CONFIG.GAME_ID] || { plays: 0, bestScore: 0, totalMerges: 0 };
+        }
+
+        function updateGameRecord(score, merges) {
+            const records = getRecords();
+            const current = records[CONFIG.GAME_ID] || { plays: 0, bestScore: 0, totalMerges: 0 };
+            current.plays = (current.plays || 0) + 1;
+            current.totalMerges = (current.totalMerges || 0) + merges;
+            if (score > (current.bestScore || 0)) {
+                current.bestScore = score;
+            }
+            records[CONFIG.GAME_ID] = current;
+            saveRecords(records);
+            return current;
+        }
+
+        function loadBestScore() {
+            const record = getGameRecord();
+            bestScoreDisplay.textContent = record.bestScore || 0;
+        }
+
+        let balls = [];
+        let currentLevel = 0;
+        let dropBall = null;
+        let isDropping = false;
+        let score = 0;
+        let totalMerges = 0;
+        let gameOver = false;
+        let imagesReady = false;
+        let isGameRecorded = false;
+
+        const GRAVITY = 0.22;
+        const FRICTION = 0.97;
+        const BOUNCE = 0.25;
+        const RADIUS_BASE = 30;
+        const RADIUS_STEP = 5;
+        const DAMPING_NEAR_ZERO = 0.05;
+        const POSITION_ITERATIONS = 3;
+
+        function getRadius(lv) { return RADIUS_BASE + lv * RADIUS_STEP; }
+
+        function randomLevel() {
+            const r = Math.random();
+            if (r < 0.30) return 0;
+            if (r < 0.55) return 1;
+            if (r < 0.75) return 2;
+            if (r < 0.88) return 3;
+            return 4;
+        }
+
+        const mergeSounds = [];
+        let celebrateSound = null;
+        let soundsReady = false;
+        let soundsLoaded = 0;
+        const totalSounds = CONFIG.SOUNDS.merge.length + 1;
+
+        function loadSounds(cb) {
+            CONFIG.SOUNDS.merge.forEach((src, i) => {
+                const audio = new Audio();
+                audio.src = src;
+                audio.preload = 'auto';
+                audio.oncanplaythrough = () => {
+                    mergeSounds[i] = audio;
+                    soundsLoaded++;
+                    if (soundsLoaded === totalSounds) { soundsReady = true; cb(); }
+                };
+                audio.onerror = () => {
+                    soundsLoaded++;
+                    if (soundsLoaded === totalSounds) { soundsReady = true; cb(); }
+                };
+            });
+
+            const audio = new Audio();
+            audio.src = CONFIG.SOUNDS.celebrate;
+            audio.preload = 'auto';
+            audio.oncanplaythrough = () => {
+                celebrateSound = audio;
+                soundsLoaded++;
+                if (soundsLoaded === totalSounds) { soundsReady = true; cb(); }
+            };
+            audio.onerror = () => {
+                soundsLoaded++;
+                if (soundsLoaded === totalSounds) { soundsReady = true; cb(); }
+            };
+        }
+
+        function playMergeSound(level) {
+            try {
+                const idx = level - 1;
+                if (mergeSounds[idx] && idx >= 0 && idx < mergeSounds.length) {
+                    mergeSounds[idx].currentTime = 0;
+                    mergeSounds[idx].play().catch(() => {});
+                }
+            } catch (_) {}
+        }
+
+        function playCelebrateSound() {
+            try {
+                if (celebrateSound) {
+                    celebrateSound.currentTime = 0;
+                    celebrateSound.play().catch(() => {});
+                }
+            } catch (_) {}
+        }
+
+        const images = [];
+        let loaded = 0;
+
+        function loadImages(cb) {
+            if (CONFIG.IMAGES.length === 0) { imagesReady = true; cb(); return; }
+            CONFIG.IMAGES.forEach((src, i) => {
+                const img = new Image();
+                img.src = src;
+                img.onload = () => {
+                    images[i] = img;
+                    loaded++;
+                    if (loaded === CONFIG.IMAGES.length) { imagesReady = true; cb(); }
+                };
+                img.onerror = () => {
+                    imagesReady = true; cb();
+                };
+            });
+        }
+
+        function updatePreview(level) {
+            const emoji = CONFIG.EMOJIS[level] || '🍎';
+            const img = images[level];
+            if (img && imagesReady) {
+                previewEmoji.style.display = 'none';
+                previewImg.style.display = 'block';
+                previewImg.src = img.src;
+            } else {
+                previewEmoji.style.display = 'block';
+                previewImg.style.display = 'none';
+                previewEmoji.textContent = emoji;
+            }
+        }
+
+        function drawBall(b) {
+            const { x, y, radius, level } = b;
+            const color = CONFIG.COLORS[level] || '#dbaa92';
+
+            ctx.shadowColor = 'rgba(0,0,0,0.08)';
+            ctx.shadowBlur = 12;
+            ctx.shadowOffsetY = 4;
+
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetY = 0;
+
+            ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(x - radius * 0.25, y - radius * 0.3, radius * 0.18, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x - radius * 0.1, y - radius * 0.5, radius * 0.08, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255,255,255,0.25)';
+            ctx.fill();
+
+            if (!imagesReady || !images[level]) {
+                ctx.font = radius * 1.1 + 'px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#2b1a0e';
+                ctx.shadowBlur = 0;
+                ctx.fillText(CONFIG.EMOJIS[level] || '❤️', x, y + 2);
+            } else {
+                const sz = radius * 1.5;
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(x, y, radius * 0.82, 0, Math.PI * 2);
+                ctx.clip();
+                ctx.drawImage(images[level], x - sz / 2, y - sz / 2, sz, sz);
+                ctx.restore();
+            }
+
+            if (level === CONFIG.MAX_LEVEL) {
+                ctx.font = '16px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.shadowBlur = 0;
+                ctx.fillText('👑', x, y - radius - 4);
+            }
+        }
+
+        function drawBackground() {
+            ctx.fillStyle = '#f5ede4';
+            ctx.fillRect(0, 0, W, H);
+
+            ctx.strokeStyle = 'rgba(180,160,145,0.06)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < W; i += 30) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, H);
+                ctx.stroke();
+            }
+            for (let i = 0; i < H; i += 30) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(W, i);
+                ctx.stroke();
+            }
+
+            const grad = ctx.createLinearGradient(0, H - 30, 0, H);
+            grad.addColorStop(0, 'rgba(180,160,145,0)');
+            grad.addColorStop(1, 'rgba(180,160,145,0.06)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, H - 30, W, 30);
+
+            ctx.strokeStyle = 'rgba(160,140,125,0.15)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(10, GROUND_Y);
+            ctx.lineTo(W - 10, GROUND_Y);
+            ctx.stroke();
+
+            if (balls.length === 0 && !dropBall) {
+                ctx.font = '16px "PingFang SC", "Segoe UI", sans-serif';
+                ctx.fillStyle = '#bfaa9a';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('👆 拖动 · 松开掉落', W / 2, H / 2 - 10);
+            }
+        }
+
+        function resolveCollisions() {
+            for (let iter = 0; iter < POSITION_ITERATIONS; iter++) {
+                for (let i = 0; i < balls.length; i++) {
+                    for (let j = i + 1; j < balls.length; j++) {
+                        const a = balls[i];
+                        const b = balls[j];
+                        const dx = b.x - a.x;
+                        const dy = b.y - a.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        const minDist = a.radius + b.radius;
+
+                        if (dist < minDist && dist > 0.001) {
+                            const overlap = (minDist - dist) / 2;
+                            const nx = dx / dist;
+                            const ny = dy / dist;
+                            a.x -= nx * overlap * 0.8;
+                            a.y -= ny * overlap * 0.8;
+                            b.x += nx * overlap * 0.8;
+                            b.y += ny * overlap * 0.8;
+
+                            const dvx = a.vx - b.vx;
+                            const dvy = a.vy - b.vy;
+                            const dvn = dvx * nx + dvy * ny;
+                            if (dvn > 0) {
+                                const impulse = dvn * (1 + BOUNCE) * 0.5;
+                                a.vx -= impulse * nx * 0.6;
+                                a.vy -= impulse * ny * 0.6;
+                                b.vx += impulse * nx * 0.6;
+                                b.vy += impulse * ny * 0.6;
+                            }
+
+                            if (a.level === b.level && a.level < CONFIG.MAX_LEVEL) {
+                                const newLv = a.level + 1;
+                                a.x = (a.x + b.x) / 2;
+                                a.y = (a.y + b.y) / 2;
+                                a.level = newLv;
+                                a.radius = getRadius(newLv);
+                                a.vx = (a.vx + b.vx) * 0.2;
+                                a.vy = (a.vy + b.vy) * 0.2 - 0.8;
+                                balls.splice(j, 1);
+                                j--;
+
+                                totalMerges++;
+                                score += (newLv + 1) * 10;
+                                scoreNum.textContent = score;
+
+                                if (newLv === CONFIG.MAX_LEVEL) {
+                                    playCelebrateSound();
+                                    showCelebration();
+                                } else {
+                                    playMergeSound(newLv);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function updatePhysics() {
+            for (const b of balls) {
+                b.vy += GRAVITY;
+                b.x += b.vx || 0;
+                b.y += b.vy;
+                if (b.vx) b.vx *= FRICTION;
+                b.vy *= FRICTION;
+
+                if (b.x - b.radius < 2) {
+                    b.x = 2 + b.radius;
+                    b.vx = -b.vx * BOUNCE;
+                    if (Math.abs(b.vx) < DAMPING_NEAR_ZERO) b.vx = 0;
+                } else if (b.x + b.radius > W - 2) {
+                    b.x = W - 2 - b.radius;
+                    b.vx = -b.vx * BOUNCE;
+                    if (Math.abs(b.vx) < DAMPING_NEAR_ZERO) b.vx = 0;
+                }
+
+                if (b.y + b.radius > GROUND_Y) {
+                    b.y = GROUND_Y - b.radius;
+                    b.vy = -b.vy * BOUNCE;
+                    if (Math.abs(b.vy) < DAMPING_NEAR_ZERO) b.vy = 0;
+                }
+
+                if (b.y - b.radius < 0) {
+                    b.y = b.radius;
+                    b.vy = Math.abs(b.vy) * 0.3;
+                }
+            }
+
+            resolveCollisions();
+
+            for (const b of balls) {
+                if (Math.abs(b.vx) < DAMPING_NEAR_ZERO) b.vx = 0;
+                if (Math.abs(b.vy) < DAMPING_NEAR_ZERO) b.vy = 0;
+            }
+        }
+
+        function startDrop(x) {
+            if (gameOver || dropBall || !imagesReady) return;
+            const lv = currentLevel;
+            const r = getRadius(lv);
+            dropBall = {
+                x: Math.max(r + 2, Math.min(W - r - 2, x)),
+                y: r + 6,
+                radius: r,
+                level: lv,
+                vx: 0,
+                vy: 0.6
+            };
+            isDropping = true;
+            currentLevel = randomLevel();
+            updatePreview(currentLevel);
+        }
+
+        function updateDrop() {
+            if (!dropBall) return;
+            const b = dropBall;
+            b.vy += GRAVITY * 0.5;
+            b.x += b.vx || 0;
+            b.y += b.vy;
+
+            if (b.x - b.radius < 2) { b.x = 2 + b.radius; b.vx = -b.vx * 0.3; }
+            else if (b.x + b.radius > W - 2) { b.x = W - 2 - b.radius; b.vx = -b.vx * 0.3; }
+
+            let landed = false;
+            if (b.y + b.radius >= GROUND_Y) {
+                b.y = GROUND_Y - b.radius;
+                b.vy = 0;
+                landed = true;
+            }
+            if (!landed) {
+                for (const other of balls) {
+                    const dx = other.x - b.x, dy = other.y - b.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < b.radius + other.radius) {
+                        const nx = dx / dist, ny = dy / dist;
+                        const overlap = (b.radius + other.radius - dist);
+                        b.x -= nx * (overlap + 0.3);
+                        b.y -= ny * (overlap + 0.3);
+                        b.vy = 0;
+                        landed = true;
+                        break;
+                    }
+                }
+            }
+
+            if (landed) {
+                b.vy = 0;
+                b.vx = 0;
+                balls.push({ ...b });
+                dropBall = null;
+                isDropping = false;
+                checkGameOver();
+            }
+        }
+
+        function checkGameOver() {
+            for (const b of balls) {
+                if (b.y - b.radius < 70) {
+                    gameOver = true;
+                    saveRecord();
+                    return;
+                }
+            }
+        }
+
+        function saveRecord() {
+            if (isGameRecorded) return;
+            isGameRecorded = true;
+            const record = updateGameRecord(score, totalMerges);
+            bestScoreDisplay.textContent = record.bestScore || 0;
+            try {
+                localStorage.setItem('aibo_game_updated', Date.now().toString());
+            } catch (_) {}
+        }
+
+        function recordAndReset() {
+            if (!gameOver && balls.length > 0) {
+                saveRecord();
+            }
+            balls = [];
+            dropBall = null;
+            isDropping = false;
+            gameOver = false;
+            score = 0;
+            totalMerges = 0;
+            isGameRecorded = false;
+            scoreNum.textContent = '0';
+            currentLevel = randomLevel();
+            updatePreview(currentLevel);
+            overlay.style.display = 'none';
+            loadBestScore();
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, W, H);
+            drawBackground();
+            for (const b of balls) drawBall(b);
+            if (dropBall) {
+                drawBall(dropBall);
+                ctx.beginPath();
+                ctx.setLineDash([3, 6]);
+                ctx.moveTo(dropBall.x, 8);
+                ctx.lineTo(dropBall.x, dropBall.y - dropBall.radius - 6);
+                ctx.strokeStyle = 'rgba(120,100,85,0.2)';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+            if (gameOver) {
+                ctx.fillStyle = 'rgba(245,237,228,0.5)';
+                ctx.fillRect(0, 0, W, H);
+                ctx.font = 'bold 20px "PingFang SC", sans-serif';
+                ctx.fillStyle = '#5a4032';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('😵 满啦，点「重玩」', W / 2, H / 2);
+            }
+            requestAnimationFrame(render);
+        }
+
+        function gameLoop() {
+            if (!gameOver) {
+                if (isDropping) updateDrop();
+                updatePhysics();
+            }
+            setTimeout(gameLoop, 1000 / 60);
+        }
+
+        function showCelebration() {
+            overlay.style.display = 'flex';
+        }
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
+            const c = e.touches ? e.touches[0] : e;
+            return {
+                x: (c.clientX - rect.left) * sx,
+                y: (c.clientY - rect.top) * sy
+            };
+        }
+
+        let isPointerDown = false;
+
+        canvas.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            isPointerDown = true;
+            const p = getPos(e);
+            if (p.y > 40) startDrop(p.x);
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            e.preventDefault();
+            const p = getPos(e);
+            if (isPointerDown && dropBall) {
+                dropBall.x = Math.max(dropBall.radius + 2, Math.min(W - dropBall.radius - 2, p.x));
+            }
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            e.preventDefault();
+            isPointerDown = false;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            isPointerDown = false;
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            isPointerDown = true;
+            const p = getPos(e);
+            if (p.y > 40) {
+                startDrop(p.x);
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const p = getPos(e);
+            if (isPointerDown && dropBall) {
+                dropBall.x = Math.max(dropBall.radius + 2, Math.min(W - dropBall.radius - 2, p.x));
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            isPointerDown = false;
+        }, { passive: false });
+
+        canvas.addEventListener('touchcancel', (e) => {
+            e.preventDefault();
+            isPointerDown = false;
+        }, { passive: false });
+
+        resetBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            recordAndReset();
+        });
+
+        closeBtn.addEventListener('click', () => { overlay.style.display = 'none'; });
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.style.display = 'none'; });
+
+        function init() {
+            loadBestScore();
+            currentLevel = randomLevel();
+            updatePreview(currentLevel);
+            render();
+            gameLoop();
+        }
+
+        let loadCount = 0;
+        const totalLoads = 2;
+
+        function onLoadComplete() {
+            loadCount++;
+            if (loadCount === totalLoads) {
+                init();
+            }
+        }
+
+        loadImages(onLoadComplete);
+        loadSounds(onLoadComplete);
+
+        window.addEventListener('beforeunload', () => {
+            if (!gameOver && balls.length > 0) {
+                saveRecord();
+            }
+        });
+    </script>
+</body>
+</html>

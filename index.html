@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>🎮 游戏合集</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', sans-serif;
+            background: #2b1e16;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 480px;
+            width: 100%;
+        }
+        /* 头部 */
+        .header {
+            text-align: center;
+            padding: 30px 0 20px;
+            color: #f5ede4;
+        }
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+        .header h1 span {
+            color: #f5c8a0;
+        }
+        .header p {
+            color: #bfaa9a;
+            font-size: 15px;
+            margin-top: 6px;
+        }
+
+        /* 统计卡片 */
+        .stats-card {
+            background: #3d2c20;
+            border-radius: 20px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 24px;
+            border: 1px solid #5a4032;
+        }
+        .stats-card .item {
+            text-align: center;
+        }
+        .stats-card .num {
+            font-size: 28px;
+            font-weight: 700;
+            color: #f5c8a0;
+        }
+        .stats-card .label {
+            font-size: 12px;
+            color: #a08472;
+            margin-top: 2px;
+        }
+
+        /* 游戏卡片列表 */
+        .game-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .game-card {
+            background: #f5ede4;
+            border-radius: 24px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+        }
+        .game-card:active {
+            transform: scale(0.97);
+        }
+        .game-card .icon {
+            font-size: 40px;
+            width: 60px;
+            height: 60px;
+            background: #e5d7cc;
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .game-card .info {
+            flex: 1;
+        }
+        .game-card .info h3 {
+            font-size: 18px;
+            color: #2b1a0e;
+        }
+        .game-card .info p {
+            font-size: 13px;
+            color: #8a7565;
+            margin-top: 2px;
+        }
+        .game-card .badge {
+            background: #dccfc4;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #4d372b;
+            font-weight: 600;
+        }
+        .game-card .score-tag {
+            font-size: 20px;
+            font-weight: 700;
+            color: #a67b6b;
+            min-width: 40px;
+            text-align: right;
+        }
+        .game-card .new-tag {
+            background: #f5a08c;
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-weight: 700;
+            position: absolute;
+            top: -6px;
+            right: -6px;
+        }
+        /* 占位游戏（灰色） */
+        .game-card.coming {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .game-card.coming .icon {
+            filter: grayscale(0.5);
+        }
+
+        /* 底部 */
+        .footer {
+            text-align: center;
+            padding: 24px 0 10px;
+            color: #6d5546;
+            font-size: 13px;
+        }
+        .footer a {
+            color: #bfaa9a;
+            text-decoration: none;
+        }
+
+        /* 空状态 */
+        .empty-tip {
+            color: #8a7565;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>🎮 小老鹤<span>游戏屋</span></h1>
+            <p>✨ 选一个游戏开始玩吧 ✨</p>
+        </div>
+
+        <!-- 统计 -->
+        <div class="stats-card" id="statsCard">
+            <div class="item">
+                <div class="num" id="totalGames">0</div>
+                <div class="label">总游玩</div>
+            </div>
+            <div class="item">
+                <div class="num" id="totalScore">0</div>
+                <div class="label">最高分</div>
+            </div>
+            <div class="item">
+                <div class="num" id="totalMerges">0</div>
+                <div class="label">总合成</div>
+            </div>
+        </div>
+
+        <!-- 游戏列表 -->
+        <div class="game-list">
+            <!-- 游戏1：合成游戏 -->
+            <a href="game.html" class="game-card" id="gameCard1">
+                <span class="new-tag">✨ 新</span>
+                <div class="icon">🍉</div>
+                <div class="info">
+                    <h3>合成大作战</h3>
+                    <p>拖动掉落 · 相同合成 · 挑战最高级</p>
+                </div>
+                <div class="score-tag" id="game1Score">-</div>
+            </a>
+
+            <!-- 游戏2：占位（后续添加） -->
+            <div class="game-card coming">
+                <div class="icon">🎨</div>
+                <div class="info">
+                    <h3>更多游戏</h3>
+                    <p>正在开发中，敬请期待...</p>
+                </div>
+                <div class="badge">即将上线</div>
+            </div>
+
+            <!-- 游戏3：占位 -->
+            <div class="game-card coming">
+                <div class="icon">🎵</div>
+                <div class="info">
+                    <h3>更多游戏</h3>
+                    <p>正在开发中，敬请期待...</p>
+                </div>
+                <div class="badge">即将上线</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            xx <a href="#">xx</a> xxx
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  🏠 主页逻辑 · 读取游戏记录
+        // ============================================================
+
+        const STORAGE_KEY = 'aibo_game_records';
+
+        // 读取所有记录
+        function getRecords() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                return data ? JSON.parse(data) : {};
+            } catch {
+                return {};
+            }
+        }
+
+        // 保存记录
+        function saveRecords(records) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+        }
+
+        // 更新主页统计
+        function updateStats() {
+            const records = getRecords();
+
+            // 总游玩次数
+            let totalPlays = 0;
+            let highestScore = 0;
+            let totalMerges = 0;
+
+            for (const key in records) {
+                const record = records[key];
+                if (record.plays) totalPlays += record.plays;
+                if (record.bestScore && record.bestScore > highestScore) {
+                    highestScore = record.bestScore;
+                }
+                if (record.totalMerges) totalMerges += record.totalMerges;
+            }
+
+            document.getElementById('totalGames').textContent = totalPlays;
+            document.getElementById('totalScore').textContent = highestScore;
+            document.getElementById('totalMerges').textContent = totalMerges;
+
+            // 显示游戏1的个人最高分
+            const game1 = records['game_merge'];
+            if (game1 && game1.bestScore !== undefined) {
+                document.getElementById('game1Score').textContent = game1.bestScore;
+            } else {
+                document.getElementById('game1Score').textContent = '-';
+            }
+        }
+
+        // 页面加载时更新
+        updateStats();
+
+        // 监听 storage 变化（其他页面修改时刷新）
+        window.addEventListener('storage', (e) => {
+            if (e.key === STORAGE_KEY) {
+                updateStats();
+            }
+        });
+    </script>
+
+</body>
+</html>
