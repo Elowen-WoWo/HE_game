@@ -41,7 +41,7 @@
 <div class="game-container">
     <a href="index.html" class="back-btn">←</a>
     <div class="header">
-        <div class="header-left"><span class="game-title">🦩 合成<span>小老鹤</span></span></div>
+        <div class="header-left"><span class="game-title">合成<span>小老鹤</span></span></div>
         <div style="display:flex;align-items:center;gap:6px;">
             <div class="score-box">🏆 <span class="num" id="scoreNum">0</span></div>
             <div class="current-box"><div class="current-preview" id="currentPreview"><span id="previewEmoji">🍎</span><img id="previewImg" style="display:none;" /></div></div>
@@ -55,10 +55,10 @@
 <script>
 const CONFIG={IMAGES:['assets/level_0.png','assets/level_1.png','assets/level_2.png','assets/level_3.png','assets/level_4.png','assets/level_5.png','assets/level_6.png','assets/level_7.png'],EMOJIS:['🍎','🍐','🍊','🍇','🍒','🍉','🌟','👑'],SOUNDS:{merge:['assets/sounds/merge_0.mp3','assets/sounds/merge_1.mp3','assets/sounds/merge_2.mp3','assets/sounds/merge_3.mp3','assets/sounds/merge_4.mp3','assets/sounds/merge_5.mp3','assets/sounds/merge_6.mp3'],celebrate:'assets/sounds/celebrate.mp3'},MAX_LEVEL:7,COLORS:['#f5a08c','#f5c28c','#b5d68c','#8cc9d6','#d4a0d4','#f5c8a0','#f5d88c','#f0b0d0'],GAME_ID:'game_merge'};
 const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d'),scoreNum=document.getElementById('scoreNum'),previewEmoji=document.getElementById('previewEmoji'),previewImg=document.getElementById('previewImg'),resetBtn=document.getElementById('resetBtn'),overlay=document.getElementById('celebrateOverlay'),closeBtn=document.getElementById('closeCelebrate'),bestScoreDisplay=document.getElementById('bestScoreDisplay');
-// ========== 关键参数：球体缩小 30% ==========
-const W=720,H=1160,GROUND_Y=H-24,GRAVITY=0.38,FRICTION=0.97,BOUNCE=0.25;
-const RADIUS_BASE=42;      // 之前60，缩小30%
-const RADIUS_STEP=7;       // 之前10，缩小30%
+// ========== 基础半径 55 ==========
+const W=720,H=1160,GROUND_Y=H-24,GRAVITY=0.40,FRICTION=0.97,BOUNCE=0.25;
+const RADIUS_BASE=55;
+const RADIUS_STEP=9;
 const DAMPING_NEAR_ZERO=0.1,POSITION_ITERATIONS=3,STORAGE_KEY='aibo_game_records';
 function getRecords(){try{const d=localStorage.getItem(STORAGE_KEY);return d?JSON.parse(d):{}}catch{return{}}}
 function saveRecords(r){localStorage.setItem(STORAGE_KEY,JSON.stringify(r))}
@@ -75,7 +75,6 @@ function playCelebrateSound(){try{if(celebrateSound){celebrateSound.currentTime=
 const images=[];let loaded=0;
 function loadImages(cb){if(CONFIG.IMAGES.length===0){imagesReady=true;cb();return}CONFIG.IMAGES.forEach((src,i)=>{const img=new Image();img.src=src;img.onload=()=>{images[i]=img;loaded++;if(loaded===CONFIG.IMAGES.length){imagesReady=true;cb()}};img.onerror=()=>{imagesReady=true;cb()}})}
 function updatePreview(lv){const emoji=CONFIG.EMOJIS[lv]||'🍎',img=images[lv];if(img&&imagesReady){previewEmoji.style.display='none';previewImg.style.display='block';previewImg.src=img.src}else{previewEmoji.style.display='block';previewImg.style.display='none';previewEmoji.textContent=emoji}}
-// 皇冠图
 const crownImg=new Image();
 crownImg.src='assets/crown.png';
 function drawBall(b){const{x,y,radius,level}=b,color=CONFIG.COLORS[level]||'#dbaa92';ctx.shadowColor='rgba(0,0,0,0.08)';ctx.shadowBlur=24;ctx.shadowOffsetY=8;ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.shadowBlur=0;ctx.shadowOffsetY=0;ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=4;ctx.stroke();ctx.beginPath();ctx.arc(x-radius*0.25,y-radius*0.3,radius*0.18,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.4)';ctx.fill();ctx.beginPath();ctx.arc(x-radius*0.1,y-radius*0.5,radius*0.08,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.25)';ctx.fill();if(!imagesReady||!images[level]){ctx.font=radius*1.1+'px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#2b1a0e';ctx.shadowBlur=0;ctx.fillText(CONFIG.EMOJIS[level]||'❤️',x,y+4)}else{const sz=radius*1.5;ctx.save();ctx.beginPath();ctx.arc(x,y,radius*0.82,0,Math.PI*2);ctx.clip();ctx.drawImage(images[level],x-sz/2,y-sz/2,sz,sz);ctx.restore()}if(level===CONFIG.MAX_LEVEL){const cSize=radius*1.1;if(crownImg.complete&&crownImg.naturalWidth>0){ctx.drawImage(crownImg,x-cSize/2,y-radius-cSize*0.6,cSize,cSize)}else{ctx.font='32px sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.shadowBlur=0;ctx.fillText('⭐',x,y-radius-8)}}}
