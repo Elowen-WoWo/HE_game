@@ -55,10 +55,10 @@
 <script>
 const CONFIG={IMAGES:['assets/level_0.png','assets/level_1.png','assets/level_2.png','assets/level_3.png','assets/level_4.png','assets/level_5.png','assets/level_6.png','assets/level_7.png'],EMOJIS:['🍎','🍐','🍊','🍇','🍒','🍉','🌟','👑'],SOUNDS:{merge:['assets/sounds/merge_0.mp3','assets/sounds/merge_1.mp3','assets/sounds/merge_2.mp3','assets/sounds/merge_3.mp3','assets/sounds/merge_4.mp3','assets/sounds/merge_5.mp3','assets/sounds/merge_6.mp3'],celebrate:'assets/sounds/celebrate.mp3'},MAX_LEVEL:7,COLORS:['#f5a08c','#f5c28c','#b5d68c','#8cc9d6','#d4a0d4','#f5c8a0','#f5d88c','#f0b0d0'],GAME_ID:'game_merge'};
 const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d'),scoreNum=document.getElementById('scoreNum'),previewEmoji=document.getElementById('previewEmoji'),previewImg=document.getElementById('previewImg'),resetBtn=document.getElementById('resetBtn'),overlay=document.getElementById('celebrateOverlay'),closeBtn=document.getElementById('closeCelebrate'),bestScoreDisplay=document.getElementById('bestScoreDisplay');
-// ========== 基础半径 55 ==========
-const W=720,H=1160,GROUND_Y=H-24,GRAVITY=0.40,FRICTION=0.97,BOUNCE=0.25;
-const RADIUS_BASE=55;
-const RADIUS_STEP=9;
+// ========== 基础半径 60 ==========
+const W=720,H=1160,GROUND_Y=H-24,GRAVITY=0.44,FRICTION=0.97,BOUNCE=0.25;
+const RADIUS_BASE=60;
+const RADIUS_STEP=10;
 const DAMPING_NEAR_ZERO=0.1,POSITION_ITERATIONS=3,STORAGE_KEY='aibo_game_records';
 function getRecords(){try{const d=localStorage.getItem(STORAGE_KEY);return d?JSON.parse(d):{}}catch{return{}}}
 function saveRecords(r){localStorage.setItem(STORAGE_KEY,JSON.stringify(r))}
