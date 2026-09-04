@@ -17,7 +17,7 @@
         .score-box{background:#dccfc4;padding:4px 14px 4px 10px;border-radius:30px;font-size:13px;color:#4d372b;font-weight:600;display:flex;align-items:center;gap:4px}
         .score-box .num{font-size:18px;color:#2b1a0e;min-width:24px;text-align:center}
         .current-box{display:flex;align-items:center;gap:4px;font-size:12px;color:#6d5546;font-weight:500}
-        .current-preview{width:36px;height:36px;background:#e5d7cc;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:20px;border:2px solid #d0bdb0;overflow:hidden}
+        .current-preview{width:36px;height:36px;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:20px;border:2px solid #d0bdb0;overflow:hidden;transition:background 0.3s}
         .current-preview img{width:100%;height:100%;object-fit:cover;border-radius:50%}
         .btn-reset{background:#dccfc4;border:none;padding:4px 14px;border-radius:30px;font-size:12px;font-weight:600;color:#4d372b;cursor:pointer;touch-action:manipulation}
         .btn-reset:active{transform:scale(0.92)}
@@ -44,7 +44,12 @@
         <div class="header-left"><span class="game-title">🦩 合成<span>小老鹤</span></span></div>
         <div style="display:flex;align-items:center;gap:6px;">
             <div class="score-box">🏆 <span class="num" id="scoreNum">0</span></div>
-            <div class="current-box"><div class="current-preview" id="currentPreview"><span id="previewEmoji">🍎</span><img id="previewImg" style="display:none;" /></div></div>
+            <div class="current-box">
+                <div class="current-preview" id="currentPreview" style="background:#f5a08c;">
+                    <span id="previewEmoji">🍎</span>
+                    <img id="previewImg" style="display:none;" />
+                </div>
+            </div>
             <button class="btn-reset" id="resetBtn">↻</button>
         </div>
     </div>
@@ -54,7 +59,7 @@
 <div class="celebrate-overlay" id="celebrateOverlay"><div class="celebrate-card"><span class="big">🎉</span><h2>合成成功！</h2><p>太棒啦！继续挑战吧 ✨</p><button class="btn-close-card" id="closeCelebrate">👍 继续</button></div></div>
 <script>
 // ============================================================
-//  🦩 合成小老鹤 · 10级版 (0~9)
+//  🦩 合成小老鹤 · 9级版 (0~8) · 半径50
 // ============================================================
 
 const CONFIG = {
@@ -67,10 +72,9 @@ const CONFIG = {
         'assets/level_5.png',
         'assets/level_6.png',
         'assets/level_7.png',
-        'assets/level_8.png',
-        'assets/level_9.png'
+        'assets/level_8.png'
     ],
-    EMOJIS: ['🍎', '🍐', '🍊', '🍇', '🍒', '🍉', '🥝', '🍑', '🍓', '👑'],
+    EMOJIS: ['🍎', '🍐', '🍊', '🍇', '🍒', '🍉', '🥝', '🍑', '👑'],
     SOUNDS: {
         merge: [
             'assets/sounds/merge_0.mp3',
@@ -79,15 +83,14 @@ const CONFIG = {
             'assets/sounds/merge_3.mp3',
             'assets/sounds/merge_4.mp3',
             'assets/sounds/merge_5.mp3',
-            'assets/sounds/merge_6.mp3',
-            'assets/sounds/merge_7.mp3'
+            'assets/sounds/merge_6.mp3'
         ],
         celebrate: 'assets/sounds/celebrate.mp3'
     },
-    MAX_LEVEL: 9,
+    MAX_LEVEL: 8,
     COLORS: [
         '#f5a08c', '#f5c28c', '#b5d68c', '#8cc9d6', '#d4a0d4',
-        '#f5c8a0', '#f5d88c', '#a8d8ea', '#f0b0d0', '#f5e56b'
+        '#f5c8a0', '#f5d88c', '#a8d8ea', '#f5e56b'
     ],
     GAME_ID: 'game_merge'
 };
@@ -97,16 +100,17 @@ const ctx = canvas.getContext('2d');
 const scoreNum = document.getElementById('scoreNum');
 const previewEmoji = document.getElementById('previewEmoji');
 const previewImg = document.getElementById('previewImg');
+const currentPreview = document.getElementById('currentPreview');
 const resetBtn = document.getElementById('resetBtn');
 const overlay = document.getElementById('celebrateOverlay');
 const closeBtn = document.getElementById('closeCelebrate');
 const bestScoreDisplay = document.getElementById('bestScoreDisplay');
 
-// ========== 基础半径 60 ==========
+// ========== 基础半径 50 ==========
 const W = 720, H = 1160, GROUND_Y = H - 24;
-const GRAVITY = 0.44, FRICTION = 0.97, BOUNCE = 0.25;
-const RADIUS_BASE = 60, RADIUS_STEP = 10;
-const DAMPING_NEAR_ZERO = 0.1, POSITION_ITERATIONS = 3;
+const GRAVITY = 0.36, FRICTION = 0.97, BOUNCE = 0.25;
+const RADIUS_BASE = 50, RADIUS_STEP = 8;
+const DAMPING_NEAR_ZERO = 0.08, POSITION_ITERATIONS = 3;
 const STORAGE_KEY = 'aibo_game_records';
 
 function getRecords() {
@@ -244,9 +248,14 @@ function loadImages(cb) {
     });
 }
 
+// ---------- 更新预览（带背景颜色） ----------
 function updatePreview(lv) {
-    const emoji = CONFIG.EMOJIS[lv] || '🍎',
-        img = images[lv];
+    const emoji = CONFIG.EMOJIS[lv] || '🍎';
+    const img = images[lv];
+    const color = CONFIG.COLORS[lv] || '#dbaa92';
+
+    currentPreview.style.background = color;
+
     if (img && imagesReady) {
         previewEmoji.style.display = 'none';
         previewImg.style.display = 'block';
@@ -267,8 +276,8 @@ function drawBall(b) {
     const color = CONFIG.COLORS[level] || '#dbaa92';
 
     ctx.shadowColor = 'rgba(0,0,0,0.08)';
-    ctx.shadowBlur = 24;
-    ctx.shadowOffsetY = 8;
+    ctx.shadowBlur = 18;
+    ctx.shadowOffsetY = 5;
 
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, Math.PI * 2);
@@ -278,7 +287,7 @@ function drawBall(b) {
     ctx.shadowOffsetY = 0;
 
     ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 2.5;
     ctx.stroke();
 
     ctx.beginPath();
@@ -296,7 +305,7 @@ function drawBall(b) {
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#2b1a0e';
         ctx.shadowBlur = 0;
-        ctx.fillText(CONFIG.EMOJIS[level] || '❤️', x, y + 4);
+        ctx.fillText(CONFIG.EMOJIS[level] || '❤️', x, y + 3);
     } else {
         const sz = radius * 1.5;
         ctx.save();
@@ -308,15 +317,15 @@ function drawBall(b) {
     }
 
     if (level === CONFIG.MAX_LEVEL) {
-        const cSize = radius * 1.1;
+        const cSize = radius * 1.2;
         if (crownImg.complete && crownImg.naturalWidth > 0) {
-            ctx.drawImage(crownImg, x - cSize / 2, y - radius - cSize * 0.6, cSize, cSize);
+            ctx.drawImage(crownImg, x - cSize / 2, y - radius - cSize * 0.5, cSize, cSize);
         } else {
-            ctx.font = '32px sans-serif';
+            ctx.font = '26px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
             ctx.shadowBlur = 0;
-            ctx.fillText('⭐', x, y - radius - 8);
+            ctx.fillText('⭐', x, y - radius - 6);
         }
     }
 }
@@ -347,14 +356,14 @@ function drawBackground() {
     ctx.fillRect(0, H - 60, W, 60);
 
     ctx.strokeStyle = 'rgba(160,140,125,0.15)';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 2.5;
     ctx.beginPath();
     ctx.moveTo(20, GROUND_Y);
     ctx.lineTo(W - 20, GROUND_Y);
     ctx.stroke();
 
     if (balls.length === 0 && !dropBall) {
-        ctx.font = '32px "PingFang SC", "Segoe UI", sans-serif';
+        ctx.font = '30px "PingFang SC", "Segoe UI", sans-serif';
         ctx.fillStyle = '#bfaa9a';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -400,7 +409,7 @@ function resolveCollisions() {
                         a.level = newLv;
                         a.radius = getRadius(newLv);
                         a.vx = (a.vx + b.vx) * 0.2;
-                        a.vy = (a.vy + b.vy) * 0.2 - 1.6;
+                        a.vy = (a.vy + b.vy) * 0.2 - 0.8;
                         balls.splice(j, 1);
                         j--;
 
@@ -430,12 +439,12 @@ function updatePhysics() {
         if (b.vx) b.vx *= FRICTION;
         b.vy *= FRICTION;
 
-        if (b.x - b.radius < 4) {
-            b.x = 4 + b.radius;
+        if (b.x - b.radius < 3) {
+            b.x = 3 + b.radius;
             b.vx = -b.vx * BOUNCE;
             if (Math.abs(b.vx) < DAMPING_NEAR_ZERO) b.vx = 0;
-        } else if (b.x + b.radius > W - 4) {
-            b.x = W - 4 - b.radius;
+        } else if (b.x + b.radius > W - 3) {
+            b.x = W - 3 - b.radius;
             b.vx = -b.vx * BOUNCE;
             if (Math.abs(b.vx) < DAMPING_NEAR_ZERO) b.vx = 0;
         }
@@ -465,12 +474,12 @@ function startDrop(x) {
     const lv = currentLevel,
         r = getRadius(lv);
     dropBall = {
-        x: Math.max(r + 4, Math.min(W - r - 4, x)),
-        y: r + 12,
+        x: Math.max(r + 3, Math.min(W - r - 3, x)),
+        y: r + 10,
         radius: r,
         level: lv,
         vx: 0,
-        vy: 1.2
+        vy: 1.0
     };
     isDropping = true;
     currentLevel = randomLevel();
@@ -484,8 +493,8 @@ function updateDrop() {
     b.x += b.vx || 0;
     b.y += b.vy;
 
-    if (b.x - b.radius < 4) { b.x = 4 + b.radius;
-        b.vx = -b.vx * 0.3; } else if (b.x + b.radius > W - 4) { b.x = W - 4 - b.radius;
+    if (b.x - b.radius < 3) { b.x = 3 + b.radius;
+        b.vx = -b.vx * 0.3; } else if (b.x + b.radius > W - 3) { b.x = W - 3 - b.radius;
         b.vx = -b.vx * 0.3; }
 
     let landed = false;
@@ -503,8 +512,8 @@ function updateDrop() {
                 const nx = dx / dist,
                     ny = dy / dist;
                 const overlap = (b.radius + other.radius - dist);
-                b.x -= nx * (overlap + 0.6);
-                b.y -= ny * (overlap + 0.6);
+                b.x -= nx * (overlap + 0.4);
+                b.y -= ny * (overlap + 0.4);
                 b.vy = 0;
                 landed = true;
                 break;
@@ -524,7 +533,7 @@ function updateDrop() {
 
 function checkGameOver() {
     for (const b of balls) {
-        if (b.y - b.radius < 140) {
+        if (b.y - b.radius < 100) {
             gameOver = true;
             saveRecord();
             return;
@@ -565,18 +574,18 @@ function render() {
     if (dropBall) {
         drawBall(dropBall);
         ctx.beginPath();
-        ctx.setLineDash([6, 12]);
-        ctx.moveTo(dropBall.x, 16);
-        ctx.lineTo(dropBall.x, dropBall.y - dropBall.radius - 12);
+        ctx.setLineDash([4, 8]);
+        ctx.moveTo(dropBall.x, 14);
+        ctx.lineTo(dropBall.x, dropBall.y - dropBall.radius - 10);
         ctx.strokeStyle = 'rgba(120,100,85,0.2)';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2;
         ctx.stroke();
         ctx.setLineDash([]);
     }
     if (gameOver) {
         ctx.fillStyle = 'rgba(245,237,228,0.5)';
         ctx.fillRect(0, 0, W, H);
-        ctx.font = 'bold 40px "PingFang SC", sans-serif';
+        ctx.font = 'bold 38px "PingFang SC", sans-serif';
         ctx.fillStyle = '#5a4032';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -614,13 +623,13 @@ canvas.addEventListener('mousedown', e => {
     e.preventDefault();
     isPointerDown = true;
     const p = getPos(e);
-    if (p.y > 80) startDrop(p.x);
+    if (p.y > 70) startDrop(p.x);
 });
 
 canvas.addEventListener('mousemove', e => {
     e.preventDefault();
     const p = getPos(e);
-    if (isPointerDown && dropBall) dropBall.x = Math.max(dropBall.radius + 4, Math.min(W - dropBall.radius - 4, p.x));
+    if (isPointerDown && dropBall) dropBall.x = Math.max(dropBall.radius + 3, Math.min(W - dropBall.radius - 3, p.x));
 });
 
 canvas.addEventListener('mouseup', e => {
@@ -636,13 +645,13 @@ canvas.addEventListener('touchstart', e => {
     e.preventDefault();
     isPointerDown = true;
     const p = getPos(e);
-    if (p.y > 80) startDrop(p.x);
+    if (p.y > 70) startDrop(p.x);
 }, { passive: false });
 
 canvas.addEventListener('touchmove', e => {
     e.preventDefault();
     const p = getPos(e);
-    if (isPointerDown && dropBall) dropBall.x = Math.max(dropBall.radius + 4, Math.min(W - dropBall.radius - 4, p.x));
+    if (isPointerDown && dropBall) dropBall.x = Math.max(dropBall.radius + 3, Math.min(W - dropBall.radius - 3, p.x));
 }, { passive: false });
 
 canvas.addEventListener('touchend', e => {
