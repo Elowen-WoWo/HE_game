@@ -59,7 +59,7 @@
 <div class="celebrate-overlay" id="celebrateOverlay"><div class="celebrate-card"><span class="big">🎉</span><h2>合成成功！</h2><p>太棒啦！继续挑战吧 ✨</p><button class="btn-close-card" id="closeCelebrate">👍 继续</button></div></div>
 <script>
 // ============================================================
-//  🦩 合成小老鹤 · 9级版 (0~8) · 半径50
+//  🦩 合成小老鹤 · 10级版 (0~9) · 半径55
 // ============================================================
 
 const CONFIG = {
@@ -72,9 +72,10 @@ const CONFIG = {
         'assets/level_5.png',
         'assets/level_6.png',
         'assets/level_7.png',
-        'assets/level_8.png'
+        'assets/level_8.png',
+        'assets/level_9.png'
     ],
-    EMOJIS: ['🍎', '🍐', '🍊', '🍇', '🍒', '🍉', '🥝', '🍑', '👑'],
+    EMOJIS: ['🍎', '🍐', '🍊', '🍇', '🍒', '🍉', '🥝', '🍑', '🍓', '👑'],
     SOUNDS: {
         merge: [
             'assets/sounds/merge_0.mp3',
@@ -83,14 +84,15 @@ const CONFIG = {
             'assets/sounds/merge_3.mp3',
             'assets/sounds/merge_4.mp3',
             'assets/sounds/merge_5.mp3',
-            'assets/sounds/merge_6.mp3'
+            'assets/sounds/merge_6.mp3',
+            'assets/sounds/merge_7.mp3'
         ],
         celebrate: 'assets/sounds/celebrate.mp3'
     },
-    MAX_LEVEL: 8,
+    MAX_LEVEL: 9,
     COLORS: [
         '#f5a08c', '#f5c28c', '#b5d68c', '#8cc9d6', '#d4a0d4',
-        '#f5c8a0', '#f5d88c', '#a8d8ea', '#f5e56b'
+        '#f5c8a0', '#f5d88c', '#a8d8ea', '#f0b0d0', '#f5e56b'
     ],
     GAME_ID: 'game_merge'
 };
@@ -106,10 +108,10 @@ const overlay = document.getElementById('celebrateOverlay');
 const closeBtn = document.getElementById('closeCelebrate');
 const bestScoreDisplay = document.getElementById('bestScoreDisplay');
 
-// ========== 基础半径 50 ==========
+// ========== 基础半径 55 ==========
 const W = 720, H = 1160, GROUND_Y = H - 24;
-const GRAVITY = 0.36, FRICTION = 0.97, BOUNCE = 0.25;
-const RADIUS_BASE = 50, RADIUS_STEP = 8;
+const GRAVITY = 0.40, FRICTION = 0.97, BOUNCE = 0.25;
+const RADIUS_BASE = 55, RADIUS_STEP = 9;
 const DAMPING_NEAR_ZERO = 0.08, POSITION_ITERATIONS = 3;
 const STORAGE_KEY = 'aibo_game_records';
 
@@ -159,10 +161,10 @@ function getRadius(lv) { return RADIUS_BASE + lv * RADIUS_STEP; }
 
 function randomLevel() {
     const r = Math.random();
-    if (r < 0.28) return 0;
-    if (r < 0.50) return 1;
-    if (r < 0.70) return 2;
-    if (r < 0.85) return 3;
+    if (r < 0.27) return 0;
+    if (r < 0.48) return 1;
+    if (r < 0.67) return 2;
+    if (r < 0.83) return 3;
     return 4;
 }
 
@@ -248,7 +250,7 @@ function loadImages(cb) {
     });
 }
 
-// ---------- 更新预览（带背景颜色） ----------
+// ---------- 更新预览 ----------
 function updatePreview(lv) {
     const emoji = CONFIG.EMOJIS[lv] || '🍎';
     const img = images[lv];
@@ -276,7 +278,7 @@ function drawBall(b) {
     const color = CONFIG.COLORS[level] || '#dbaa92';
 
     ctx.shadowColor = 'rgba(0,0,0,0.08)';
-    ctx.shadowBlur = 18;
+    ctx.shadowBlur = 20;
     ctx.shadowOffsetY = 5;
 
     ctx.beginPath();
@@ -321,7 +323,7 @@ function drawBall(b) {
         if (crownImg.complete && crownImg.naturalWidth > 0) {
             ctx.drawImage(crownImg, x - cSize / 2, y - radius - cSize * 0.5, cSize, cSize);
         } else {
-            ctx.font = '26px sans-serif';
+            ctx.font = '28px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
             ctx.shadowBlur = 0;
@@ -409,7 +411,7 @@ function resolveCollisions() {
                         a.level = newLv;
                         a.radius = getRadius(newLv);
                         a.vx = (a.vx + b.vx) * 0.2;
-                        a.vy = (a.vy + b.vy) * 0.2 - 0.8;
+                        a.vy = (a.vy + b.vy) * 0.2 - 0.9;
                         balls.splice(j, 1);
                         j--;
 
@@ -533,7 +535,7 @@ function updateDrop() {
 
 function checkGameOver() {
     for (const b of balls) {
-        if (b.y - b.radius < 100) {
+        if (b.y - b.radius < 110) {
             gameOver = true;
             saveRecord();
             return;
